@@ -1,6 +1,7 @@
 pub struct LimitedList<T, const LIMIT: usize> {
     contents: [T; LIMIT],
     ind: usize,
+    written: usize,
 }
 
 impl<T, const LIMIT: usize> LimitedList<T, LIMIT> {
@@ -8,6 +9,7 @@ impl<T, const LIMIT: usize> LimitedList<T, LIMIT> {
         LimitedList {
             contents: unsafe { std::mem::zeroed() },
             ind: 0,
+            written: 0,
         }
     }
 
@@ -15,10 +17,14 @@ impl<T, const LIMIT: usize> LimitedList<T, LIMIT> {
         self.contents[self.ind] = val;
         self.ind += 1;
         self.ind %= LIMIT;
+        self.written += 1;
     }
 
     pub fn clean(&mut self) {
-        self.contents.rotate_left(self.ind);
+        if self.written > LIMIT {
+            self.contents.rotate_left(self.ind);
+            self.ind = 0;
+        }
     }
 }
 

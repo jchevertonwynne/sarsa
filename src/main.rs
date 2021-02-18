@@ -2,17 +2,20 @@ use core::ops::Range;
 use rand::prelude::{thread_rng, ThreadRng};
 use rand::Rng;
 use sarsa::LimitedList;
-use std::{cmp::{max, min}, sync::atomic::{AtomicUsize, Ordering}};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
+use std::{
+    cmp::{max, min},
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 const M: usize = 20;
 const N: usize = 20;
 const DIMS: usize = 8;
 const TAKE_LAST_N: usize = 100;
 
-const TRIALS: usize = 1_000_000;
+const TRIALS: usize = 100_000_000;
 const MAX_STEPS: usize = 100;
 const EPSILON: f64 = 0.12;
 const GAMMA: f64 = 0.999;
@@ -56,7 +59,7 @@ fn rand_grid<const X: usize, const Y: usize, const Z: usize>(
     for x in res.iter_mut() {
         for y in x.iter_mut() {
             for z in y.iter_mut() {
-                *z =  rng.gen();
+                *z = rng.gen();
             }
         }
     }
