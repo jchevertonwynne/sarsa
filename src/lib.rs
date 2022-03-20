@@ -38,7 +38,8 @@ impl<T: Default, const LIMIT: usize> IntoIterator for LimitedList<T, LIMIT> {
 
     type IntoIter = LimitedListIterator<T, LIMIT>;
 
-    fn into_iter(self) -> Self::IntoIter {
+    fn into_iter(mut self) -> Self::IntoIter {
+        self.clean();
         Self::IntoIter { ll: self, ind: 0 }
     }
 }
@@ -47,7 +48,7 @@ impl<T: Default, const LIMIT: usize> Iterator for LimitedListIterator<T, LIMIT> 
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.ind < LIMIT {
+        if self.ind < LIMIT && self.ind < self.ll.written {
             let mut v = Self::Item::default();
             std::mem::swap(&mut v, &mut self.ll.contents[self.ind]);
             self.ind += 1;
@@ -71,5 +72,14 @@ mod test {
         assert_eq!(ll.contents, [4, 5, 6, 3]);
         ll.clean();
         assert_eq!(ll.contents, [3, 4, 5, 6]);
+    }
+
+    #[test]
+    fn partial_iterator_read_out_for_non_filled_list() {
+        let mut ll: LimitedList<usize, 4> = LimitedList::new();
+        ll.push(1);
+        ll.push(2);
+        let items = ll.into_iter().collect::<Vec<_>>();
+        assert_eq!(items, vec![1, 2])
     }
 }

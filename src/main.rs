@@ -22,7 +22,7 @@ const GAMMA: f64 = 0.999;
 const LEARNING_RATE: f64 = 0.47;
 
 const THREAD_COUNT: usize = 20;
-const REPEATS: usize = 100;
+const REPEATS: usize = 20;
 
 struct Coord {
     x: usize,
@@ -75,7 +75,7 @@ fn choose_action<const Z: usize>(q: &QValues<Z>, rng: &mut ThreadRng) -> usize {
             .unwrap()
             .0
     } else {
-        rng.gen_range(0..7)
+        rng.gen_range(0..Z)
     }
 }
 
@@ -138,10 +138,9 @@ fn main() {
                 let avg = (r.into_iter().sum::<u64>() as f64) / (TAKE_LAST_N as f64);
                 let mut val = counter.lock().unwrap();
                 *val += avg;
+                let new_finished = finished.fetch_add(1, Ordering::SeqCst);
+                println!("{}", new_finished);
             }
-
-            let new_finished = finished.fetch_add(runs_per_thread, Ordering::SeqCst);
-            println!("{}", new_finished);
         });
 
         threads.push(handle);
